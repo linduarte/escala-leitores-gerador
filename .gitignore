@@ -2,4 +2,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 .venv/
+
+
+# Dados locais e gerados
 data/*.xlsx
+data/*.json
