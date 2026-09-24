@@ -12,12 +12,22 @@ dependencies = [
     "matplotlib>=3.11.2",
     "openpyxl>=3.1.5",
     "pandas>=3.0.6",
+    "pandas-stubs>=3.0.5.260914",
 ]
 
 [project.scripts]
-escala-leitores-gerador = "escala_leitores_gerador:main"
 escala = "src.main:cli"
+escala-leitores-gerador = "src.main:cli"
+
+[tool.uv.build-backend]
+module-name = "src"
+module-root = ""
 
 [build-system]
 requires = ["uv_build>=0.12.7,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "openpyxl-stubs>=0.1.25",
+]
