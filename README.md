@@ -29,11 +29,11 @@ Dica: Se o argumento --out não for informado, o arquivo será gerado automatica
 ```powershell
 uv run escala gabarito --mes 10 --ano 2026 --out data/gabarito_outubro_2026.xlsx
 ```
-2. Preenchimento do Gabarito
-Abra a planilha gerada na pasta data/ e preencha as escalas associando os números correspondentes aos leitores (ou o nome direto de convidados).
 
+2. Preenchimento do Gabarito
+   Abra a planilha gerada na pasta data/ e preencha as escalas associando os números correspondentes aos leitores (ou o nome direto de convidados).
 3. Gerar PDF Final Formatado
-Após o preenchimento da planilha, execute o comando de exportação para converter os números nos nomes reais (baseado no data/leitores.json) e gerar o PDF final em formato A4 Landscape:
+   Após o preenchimento da planilha, execute o comando de exportação para converter os números nos nomes reais (baseado no data/leitores.json) e gerar o PDF final em formato A4 Landscape:
 
 ```powershell
 uv run escala pdf --input data/gabarito_outubro_2026.xlsx --out output/escala_outubro_2026.pdf
@@ -45,4 +45,3 @@ data/leitores.json: Mapeamento local dos números e nomes dos leitores (ignorado
 data/*.xlsx: Gabaritos gerados e preenchidos (ignorados no Git).
 
 output/*.pdf: Escalas finais geradas em PDF para impressão.
-
