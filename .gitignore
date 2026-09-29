@@ -7,3 +7,4 @@ __pycache__/
 # Dados locais e gerados
 data/*.xlsx
 data/*.json
+output/*.pdf

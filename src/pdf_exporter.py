@@ -1,45 +1,62 @@
 """Exportador de planilhas Excel para arquivos PDF formatados."""
 
+import json
+import re
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
 
 def exportar_para_pdf(excel_path: str, pdf_output_path: str):
-    """Exporta os dados de uma planilha Excel para um arquivo PDF formatado."""
-    df = pd.read_excel(excel_path, skiprows=1)  # Pula o título principal
+    """Exporta uma planilha Excel para PDF, substituindo números por nomes."""
+    mapa_leitores = _carregar_mapa_leitores()
 
-    fig, ax = plt.subplots(figsize=(11.69, 8.27))  # A4 Landscape
+    # Ajuste o 'header' conforme a linha onde estão os títulos das colunas na planilha (0, 1 ou 2)
+    df = pd.read_excel(excel_path, header=1)
+
+    # Substituir números por nomes
+    def buscar_nome(celula):
+        if pd.isna(celula):
+            return ""
+        if isinstance(celula, (int, float)):
+            chave = str(int(celula))
+        else:
+            chave = str(celula).strip()
+        return mapa_leitores.get(chave, celula)
+
+    df_formatado = df.map(buscar_nome)
+
+    # Renderizar PDF
+    _, ax = plt.subplots(figsize=(11.69, 8.27)) # A4 Landscape
     ax.axis("tight")
     ax.axis("off")
 
-    title = excel_path.split("/")[-1].replace(".xlsx", "").replace("_", " ").upper()
-    fig.suptitle(title, fontsize=15, fontweight="bold", y=0.96, color="#1A365D")
-
-    headers = list(df.columns)
-    data_matrix = [headers] + df.values.tolist()
-
-    table = ax.table(
-        cellText=data_matrix,
-        cellLoc="center",
+    tabela = ax.table(
+        cellText=df_formatado.astype(str).values.tolist(),
+        colLabels=df_formatado.columns.astype(str).tolist(),
         loc="center",
-        colWidths=[0.08, 0.08, 0.07, 0.17, 0.17, 0.17, 0.17, 0.17],
+        cellLoc="center"
     )
-    table.auto_set_font_size(False)
-    table.set_fontsize(8.5)
+    tabela.auto_set_font_size(False)
+    tabela.set_fontsize(8)
+    tabela.scale(1.2, 1.2)
 
-    # Estilização das células
-    for (r, _), cell in table.get_celld().items():
-        cell.set_height(0.026)
-        if r == 0:
-            cell.set_facecolor("#1A365D")
-            cell.get_text().set_color("white")
-            cell.get_text().set_fontweight("bold")
-        else:
-            dia_val = data_matrix[r][1]
-            if "Sábado" in str(dia_val) or "Domingo" in str(dia_val):
-                cell.set_facecolor("#EDF2F7")
-                cell.get_text().set_fontweight("bold")
+    plt.savefig(pdf_output_path, bbox_inches="tight", format="pdf")
+    plt.close()
 
-    fig.subplots_adjust(left=0.03, right=0.97, top=0.90, bottom=0.03)
-    fig.savefig(pdf_output_path, format="pdf", dpi=300)
-    plt.close(fig)
+
+def _carregar_mapa_leitores():
+    """Carrega o mapeamento entre os números e os nomes dos leitores."""
+    json_path = Path("data/leitores.json")
+    mapa_leitores = {}
+    if not json_path.exists():
+        return mapa_leitores
+
+    with open(json_path, "r", encoding="utf-8") as arquivo:
+        for item in json.load(arquivo):
+            valor = list(item.values())[0] if isinstance(item, dict) else ""
+            match = re.search(r"\|\s*(\d+)\s*\|\s*([^|]+)\s*\|", valor)
+            if match:
+                mapa_leitores[match.group(1).strip()] = match.group(2).strip()
+    return mapa_leitores
